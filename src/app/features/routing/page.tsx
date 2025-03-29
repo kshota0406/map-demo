@@ -23,9 +23,6 @@ const POIs: Waypoint[] = [
   { name: '上野駅', longitude: 139.7770, latitude: 35.7141 }
 ];
 
-// GeoJSON型定義
-type LineStringFeature = GeoJSON.Feature<GeoJSON.LineString>;
-
 export default function RoutingPage() {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [startPoint, setStartPoint] = useState<Waypoint>(POIs[0]);

@@ -352,10 +352,10 @@ export default function GeolocationPage() {
     setTracking(true);
   };
 
-  // ジオコーディング結果を表示する関数
-  const updateGeocodingResult = () => {
-    // 実装が必要な場合は追加
-  };
+  // ジオコーディング結果を表示する関数 - 未実装なので削除
+  // const updateGeocodingResult = () => {
+  //   // 実装が必要な場合は追加
+  // };
 
   // 精度サークルを更新する関数
   const updateAccuracyCircle = (longitude: number, latitude: number, accuracy: number) => {

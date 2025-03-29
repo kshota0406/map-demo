@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Card, CardContent, Grid, Container, Paper, useTheme, useMediaQuery, Fade, Grow } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Container, Fade, Grow } from '@mui/material';
 import Link from 'next/link';
-import MapIcon from '@mui/icons-material/Map';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LayersIcon from '@mui/icons-material/Layers';
 import NavigationIcon from '@mui/icons-material/Navigation';
@@ -53,8 +52,6 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ title, description, icon, color, path, index }: FeatureCardProps) {
-  const theme = useTheme();
-  
   return (
     <Box 
       sx={{ 
@@ -171,7 +168,7 @@ function FeatureCard({ title, description, icon, color, path, index }: FeatureCa
               <Button 
                 variant="text" 
                 sx={{ 
-                  color: theme.palette.primary.main,
+                  color: '#1976d2',
                   fontWeight: 600
                 }}
               >
@@ -186,8 +183,6 @@ function FeatureCard({ title, description, icon, color, path, index }: FeatureCa
 }
 
 export default function Home() {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [loaded, setLoaded] = useState(false);
   
   useEffect(() => {

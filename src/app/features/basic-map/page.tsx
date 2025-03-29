@@ -5,7 +5,6 @@ import { Box, Typography, Slider, Select, MenuItem, FormControl, SelectChangeEve
 import Layout from '../../components/Layout';
 import MapContainer from '../../components/MapContainer';
 import ControlPanel from '../../components/ControlPanel';
-import maplibregl from 'maplibre-gl';
 
 interface Location {
   name: string;
@@ -37,10 +36,8 @@ export default function BasicMapPage() {
     setZoom(newValue as number);
   };
   
-  const handleMapLoad = (loadedMap: maplibregl.Map) => {
+  const handleMapLoad = () => {
     // マップロード時の処理が必要な場合はここに追加
-    // 使用するまでコメントアウト
-    // const map = loadedMap;
   };
 
   return (
