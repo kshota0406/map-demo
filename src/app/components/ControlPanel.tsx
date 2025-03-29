@@ -10,7 +10,6 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
 

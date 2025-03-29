@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Slider, Select, MenuItem, FormControl, SelectChangeEvent } from '@mui/material';
 import Layout from '../../components/Layout';
 import MapContainer from '../../components/MapContainer';
@@ -26,20 +26,19 @@ export default function BasicMapPage() {
   const [selectedLocation, setSelectedLocation] = useState<string>('東京');
   const [zoom, setZoom] = useState<number>(4);
   const [location, setLocation] = useState<Location>(locations['東京']);
-  const [map, setMap] = useState<maplibregl.Map | null>(null);
-
+  
   const handleLocationChange = (event: SelectChangeEvent) => {
-    const city = event.target.value;
-    setSelectedLocation(city);
-    setLocation(locations[city]);
+    const newLocation = event.target.value;
+    setSelectedLocation(newLocation);
+    setLocation(locations[newLocation as keyof typeof locations]);
   };
-
+  
   const handleZoomChange = (_event: Event, newValue: number | number[]) => {
     setZoom(newValue as number);
   };
-
-  const handleMapLoad = (newMap: maplibregl.Map) => {
-    setMap(newMap);
+  
+  const handleMapLoad = (loadedMap: maplibregl.Map) => {
+    // マップロード時の処理が必要な場合はここに追加
   };
 
   return (

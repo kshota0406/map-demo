@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Paper, Button, Stack, Chip, CircularProgress, Alert, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { Box, Typography, Button, Alert, List, ListItem, ListItemText, Divider, Stack, Chip } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
-import SpeedIcon from '@mui/icons-material/Speed';
-import HeightIcon from '@mui/icons-material/Height';
 import WarningIcon from '@mui/icons-material/Warning';
+import CircularProgress from '@mui/material/CircularProgress';
 import Layout from '../../components/Layout';
 import MapContainer from '../../components/MapContainer';
 import ControlPanel from '../../components/ControlPanel';
 import maplibregl from 'maplibre-gl';
+import HeightIcon from '@mui/icons-material/Height';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 interface GeolocationData {
   longitude: number;
@@ -24,7 +25,8 @@ interface GeolocationData {
 }
 
 export default function GeolocationPage() {
-  const [map, setMap] = useState<maplibregl.Map | null>(null);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
   const [geoData, setGeoData] = useState<GeolocationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +35,10 @@ export default function GeolocationPage() {
   const watchId = useRef<number | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const accuracyCircleRef = useRef<string>('geolocation-accuracy-circle');
+  const trackPointsRef = useRef<[number, number][]>([]);
 
   const handleMapLoad = (loadedMap: maplibregl.Map) => {
-    setMap(loadedMap);
+    map.current = loadedMap;
   };
 
   const getCurrentLocation = () => {
@@ -43,7 +46,7 @@ export default function GeolocationPage() {
       setError('お使いのブラウザはジオロケーションをサポートしていません。モックデータを使用します。');
       
       // ブラウザが位置情報をサポートしていない場合はモックデータを使用
-      useMockLocation();
+      createMockLocation();
       return;
     }
 
@@ -69,9 +72,9 @@ export default function GeolocationPage() {
           setGeoData(newGeoData);
           setLocationHistory(prev => [newGeoData, ...prev].slice(0, 5));
           
-          if (map) {
+          if (map.current) {
             // マップの中心を現在地に移動
-            map.flyTo({
+            map.current.flyTo({
               center: [longitude, latitude],
               zoom: 15
             });
@@ -84,7 +87,7 @@ export default function GeolocationPage() {
                 color: '#3F51B5'
               })
                 .setLngLat([longitude, latitude])
-                .addTo(map);
+                .addTo(map.current);
             }
             
             // 精度サークルを表示または更新
@@ -121,7 +124,7 @@ export default function GeolocationPage() {
           setError(errorMessage);
           
           // エラーが発生した場合はモックデータを使用
-          useMockLocation();
+          createMockLocation();
         },
         {
           enableHighAccuracy: true,
@@ -135,12 +138,12 @@ export default function GeolocationPage() {
       setError('位置情報の取得に失敗しました。モックデータを使用します。');
       
       // エラーが発生した場合はモックデータを使用
-      useMockLocation();
+      createMockLocation();
     }
   };
 
   // 開発用のモックデータを使用する関数
-  const useMockLocation = () => {
+  const createMockLocation = () => {
     const mockData: GeolocationData = {
       longitude: 139.7634,
       latitude: 35.6812,
@@ -155,9 +158,9 @@ export default function GeolocationPage() {
     setGeoData(mockData);
     setLocationHistory(prev => [mockData, ...prev].slice(0, 5));
     
-    if (map) {
+    if (map.current) {
       // マップの中心を現在地に移動
-      map.flyTo({
+      map.current.flyTo({
         center: [mockData.longitude, mockData.latitude],
         zoom: 15
       });
@@ -170,7 +173,7 @@ export default function GeolocationPage() {
           color: '#3F51B5'
         })
           .setLngLat([mockData.longitude, mockData.latitude])
-          .addTo(map);
+          .addTo(map.current);
       }
       
       // 精度サークルを表示または更新
@@ -223,9 +226,9 @@ export default function GeolocationPage() {
             setGeoData(newGeoData);
             setLocationHistory(prev => [newGeoData, ...prev].slice(0, 5));
             
-            if (map) {
+            if (map.current) {
               // マップの中心を現在地に移動
-              map.panTo([longitude, latitude]);
+              map.current.panTo([longitude, latitude]);
               
               // マーカーを表示または更新
               if (markerRef.current) {
@@ -235,7 +238,7 @@ export default function GeolocationPage() {
                   color: '#3F51B5'
                 })
                   .setLngLat([longitude, latitude])
-                  .addTo(map);
+                  .addTo(map.current);
               }
               
               // 精度サークルを更新
@@ -302,7 +305,6 @@ export default function GeolocationPage() {
       mockCount++;
       
       // 前回のデータを基準に少しずれた位置を生成
-      const jitter = 0.0005;
       const prevData = geoData || {
         longitude: mockBaseLng,
         latitude: mockBaseLat,
@@ -332,142 +334,142 @@ export default function GeolocationPage() {
       setGeoData(mockData);
       setLocationHistory(prev => [mockData, ...prev].slice(0, 5));
       
-      if (map) {
-        // マップの中心を現在地に移動
-        map.panTo([mockData.longitude, mockData.latitude]);
+      if (map.current) {
+        // マップの中心を更新
+        map.current.flyTo({
+          center: [mockData.longitude, mockData.latitude],
+          essential: true
+        });
         
-        // マーカーを表示または更新
-        if (markerRef.current) {
-          markerRef.current.setLngLat([mockData.longitude, mockData.latitude]);
-        } else {
-          markerRef.current = new maplibregl.Marker({
-            color: '#3F51B5'
-          })
-            .setLngLat([mockData.longitude, mockData.latitude])
-            .addTo(map);
-        }
-        
-        // 精度サークルを更新
+        // 精度円を更新
         updateAccuracyCircle(mockData.longitude, mockData.latitude, mockData.accuracy);
         
-        // トラッキングラインを追加/更新
+        // 追跡ラインを更新
         addLocationToTrack(mockData.longitude, mockData.latitude);
       }
-    }, 1000); // 1秒ごとに更新
+    }, 2000);
     
+    // watchIdにsetIntervalのIDを保存
     watchId.current = mockInterval as unknown as number;
     setTracking(true);
   };
 
+  // ジオコーディング結果を表示する関数
+  const updateGeocodingResult = (point: [number, number]) => {
+    // 実装が必要な場合は追加
+  };
+
+  // 精度サークルを更新する関数
   const updateAccuracyCircle = (longitude: number, latitude: number, accuracy: number) => {
-    if (!map) return;
+    if (!map.current) return;
     
-    // 半径をメートルからキロメートルに変換
-    const radiusInKm = accuracy / 1000;
-    
-    // 円のGeoJSONデータを作成
-    const point = [longitude, latitude];
-    const options = { steps: 64, units: 'kilometers' } as const;
-    
-    // すでに存在する場合は削除
-    if (map.getSource(accuracyCircleRef.current)) {
-      map.removeLayer(`${accuracyCircleRef.current}-fill`);
-      map.removeLayer(`${accuracyCircleRef.current}-outline`);
-      map.removeSource(accuracyCircleRef.current);
+    // 既存の精度サークルがあれば削除
+    if (map.current.getSource('accuracy-circle')) {
+      if (map.current.getLayer('accuracy-circle-fill')) {
+        map.current.removeLayer('accuracy-circle-fill');
+      }
+      if (map.current.getLayer('accuracy-circle-stroke')) {
+        map.current.removeLayer('accuracy-circle-stroke');
+      }
+      map.current.removeSource('accuracy-circle');
     }
     
-    // 円をシミュレートするための多角形を作成
-    const circle = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          Array.from({ length: 64 }, (_, i) => {
-            const angle = (i / 64) * Math.PI * 2;
-            const latOffset = (accuracy / 111111) * Math.sin(angle);
-            const lonOffset = (accuracy / (111111 * Math.cos(latitude * (Math.PI / 180)))) * Math.cos(angle);
-            return [longitude + lonOffset, latitude + latOffset];
-          })
-        ]
-      },
-      properties: {}
-    };
-    
-    // ソースとレイヤーを追加
-    map.addSource(accuracyCircleRef.current, {
+    // 新しい精度サークルを追加
+    map.current.addSource('accuracy-circle', {
       type: 'geojson',
-      data: circle as any
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        },
+        properties: {}
+      } as GeoJSON.Feature<GeoJSON.Point>
     });
     
-    map.addLayer({
-      id: `${accuracyCircleRef.current}-fill`,
-      type: 'fill',
-      source: accuracyCircleRef.current,
+    map.current.addLayer({
+      id: 'accuracy-circle-fill',
+      type: 'circle',
+      source: 'accuracy-circle',
       paint: {
-        'fill-color': '#3F51B5',
-        'fill-opacity': 0.2
+        'circle-radius': metersToPixelsAtMaxZoom(accuracy, latitude),
+        'circle-color': 'rgba(63, 81, 181, 0.2)',
       }
     });
     
-    map.addLayer({
-      id: `${accuracyCircleRef.current}-outline`,
-      type: 'line',
-      source: accuracyCircleRef.current,
+    map.current.addLayer({
+      id: 'accuracy-circle-stroke',
+      type: 'circle',
+      source: 'accuracy-circle',
       paint: {
-        'line-color': '#3F51B5',
-        'line-width': 2,
-        'line-opacity': 0.5
+        'circle-radius': metersToPixelsAtMaxZoom(accuracy, latitude),
+        'circle-color': 'rgba(63, 81, 181, 0)',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': 'rgba(63, 81, 181, 0.8)',
       }
     });
   };
 
+  // 距離をピクセルに変換するヘルパー関数
+  const metersToPixelsAtMaxZoom = (meters: number, latitude: number) => {
+    // 赤道での1度の長さは約111.32km
+    // ズームレベル20でのピクセル数に変換
+    return meters * (1 / Math.cos(latitude * Math.PI / 180)) / 0.075;
+  };
+
+  // 動いた軌跡のラインを追加/更新
   const addLocationToTrack = (longitude: number, latitude: number) => {
-    if (!map) return;
+    if (!map.current) return;
     
-    const trackSourceId = 'geolocation-track';
-    const trackLayerId = 'geolocation-track-layer';
+    // 既存のトラッキングラインがなければ初期化
+    if (!trackPointsRef.current) {
+      trackPointsRef.current = [];
+    }
     
-    // ソースがなければ新規作成
-    if (!map.getSource(trackSourceId)) {
-      map.addSource(trackSourceId, {
+    // 新しい位置を追加
+    trackPointsRef.current.push([longitude, latitude]);
+    
+    // トラッキングラインのデータを更新
+    if (!map.current.getSource('tracking-line')) {
+      // ソースがなければ新規作成
+      map.current.addSource('tracking-line', {
         type: 'geojson',
         data: {
           type: 'Feature',
-          properties: {},
           geometry: {
             type: 'LineString',
-            coordinates: [[longitude, latitude]]
-          }
-        }
+            coordinates: trackPointsRef.current
+          },
+          properties: {}
+        } as GeoJSON.Feature<GeoJSON.LineString>
       });
       
-      map.addLayer({
-        id: trackLayerId,
+      // トラッキングラインのレイヤーを追加
+      map.current.addLayer({
+        id: 'tracking-line',
         type: 'line',
-        source: trackSourceId,
+        source: 'tracking-line',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
         paint: {
           'line-color': '#3F51B5',
-          'line-width': 3,
+          'line-width': 4,
           'line-opacity': 0.8
         }
       });
     } else {
       // 既存のソースを更新
-      const source = map.getSource(trackSourceId) as maplibregl.GeoJSONSource;
-      const data = (source as any)._data as GeoJSON.Feature;
-      
-      if (data && data.geometry && data.geometry.type === 'LineString') {
-        const coordinates = [...data.geometry.coordinates, [longitude, latitude]];
-        
-        source.setData({
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates
-          }
-        });
-      }
+      const source = map.current.getSource('tracking-line') as maplibregl.GeoJSONSource;
+      source.setData({
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: trackPointsRef.current
+        },
+        properties: {}
+      } as GeoJSON.Feature<GeoJSON.LineString>);
     }
   };
 
