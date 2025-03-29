@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, TextField, Stack, Chip } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, Button, TextField, Stack } from '@mui/material';
 import AddLocationIcon from '@mui/icons-material/AddLocation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Layout from '../../components/Layout';
@@ -69,8 +69,9 @@ export default function MarkersPage() {
     // マップからマーカーを削除
     if (markerRefs[id]) {
       markerRefs[id].remove();
-      const { [id]: _, ...rest } = markerRefs;
-      setMarkerRefs(rest);
+      const newMarkerRefs = {...markerRefs};
+      delete newMarkerRefs[id];
+      setMarkerRefs(newMarkerRefs);
     }
     
     // 状態からマーカーを削除

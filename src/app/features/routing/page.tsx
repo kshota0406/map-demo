@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Paper, Button, TextField, Stack, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, CircularProgress, Alert } from '@mui/material';
 import Layout from '../../components/Layout';
 import MapContainer from '../../components/MapContainer';
 import ControlPanel from '../../components/ControlPanel';

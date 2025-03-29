@@ -25,7 +25,6 @@ interface GeolocationData {
 }
 
 export default function GeolocationPage() {
-  const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [geoData, setGeoData] = useState<GeolocationData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +33,6 @@ export default function GeolocationPage() {
   const [locationHistory, setLocationHistory] = useState<GeolocationData[]>([]);
   const watchId = useRef<number | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
-  const accuracyCircleRef = useRef<string>('geolocation-accuracy-circle');
   const trackPointsRef = useRef<[number, number][]>([]);
 
   const handleMapLoad = (loadedMap: maplibregl.Map) => {
@@ -355,7 +353,7 @@ export default function GeolocationPage() {
   };
 
   // ジオコーディング結果を表示する関数
-  const updateGeocodingResult = (point: [number, number]) => {
+  const updateGeocodingResult = () => {
     // 実装が必要な場合は追加
   };
 
@@ -630,7 +628,7 @@ export default function GeolocationPage() {
               </Typography>
               
               <Stack spacing={1}>
-                {locationHistory.slice(1).map((data, index) => (
+                {locationHistory.slice(1).map((data) => (
                   <Box 
                     key={data.timestamp} 
                     sx={{ 

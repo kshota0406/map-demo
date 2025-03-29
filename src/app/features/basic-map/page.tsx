@@ -39,6 +39,8 @@ export default function BasicMapPage() {
   
   const handleMapLoad = (loadedMap: maplibregl.Map) => {
     // マップロード時の処理が必要な場合はここに追加
+    // 使用するまでコメントアウト
+    // const map = loadedMap;
   };
 
   return (
